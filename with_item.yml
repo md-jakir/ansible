@@ -1,0 +1,16 @@
+### This is an ansible playbook for displaying a list of fruits in localhost using with_ ansible module
+
+---
+- name: 'Print all fruits name'
+  hosts: localhost
+  gather_facts: no
+  vars:
+    fruits:
+      - Apple
+      - Banana
+      - Grapes
+      - Orange
+  tasks:
+      -
+        command: 'echo "{{ item }}"'
+        with_items: '{{ fruits }}'
