@@ -1,0 +1,7 @@
+## This is playbbook where role is defined
+
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - aws-vpc
