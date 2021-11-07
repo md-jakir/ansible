@@ -1,0 +1,19 @@
+# This ansible script is for enabling or disabling root cronjob adding or removing # inforn of line using system non-root user
+
+---
+- name: Backing up patter as My name is jakir to /tmp
+  hosts: tomcat-host
+  gather_facts: no
+  tasks:
+  - name: Tacking up crontab backup file to /tmp
+    shell: crontab -l >/tmp/root.cron
+    become: true
+  - name: Modify pattern as This is test execution
+    shell: sed -i '/This is test execution/s/^/#/g' /tmp/root.cron
+    become: true
+  - name: Modify backup file using sed as needed
+    shell: sed -e '/My name is jakir/s/^/#/g' /tmp/root.cron >/tmp/root.cron.new
+    become: true
+  - name: Replacing last one to crontab
+    shell: crontab /tmp/root.cron.new
+    become: true
