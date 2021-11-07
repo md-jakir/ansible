@@ -1,8 +1,8 @@
-# This ansible script is for enabling or disabling root cronjob adding or removing # inforn of line using system non-root user
+# This ansible script is for enabling or disabling root cronjob in multiple server adding or removing # infornt of cronjob using system non-root user
 
----
-- name: Backing up patter as My name is jakir to /tmp
-  hosts: tomcat-host
+--- 
+- name: working on 107 for root cronjob
+  hosts: cron-host[0]
   gather_facts: no
   tasks:
   - name: Tacking up crontab backup file to /tmp
@@ -17,3 +17,17 @@
   - name: Replacing last one to crontab
     shell: crontab /tmp/root.cron.new
     become: true
+- name: working on 105 for root cronjob
+  hosts: cron-host[1]
+  gather_facts: no
+  tasks:
+  - name: Tacking current cronjob bakcup to /tmp
+    shell: crontab -l >/tmp/root.cron
+    become: true
+  - name: Disabling cronjob matching pattern
+    shell: sed -e '/docer.logs/s/^/#/g' /tmp/root.cron >/tmp/root.cron.new
+    become: true
+  - name: Restore /tmp/root.cron.new 
+    shell: crontab /tmp/root.cron.new
+    become: true
+
