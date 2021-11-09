@@ -1,33 +1,67 @@
 # This ansible script is for enabling or disabling root cronjob in multiple server adding or removing # infornt of cronjob using system non-root user
 
---- 
-- name: working on 107 for root cronjob
+---
+- name: working on 108 for root cronjob
   hosts: cron-host[0]
   gather_facts: no
+  vars:
+    cron_hr: "{{ hour }}"
+    cron_min: "{{ mintue }}"
   tasks:
+  - name: Change time in cronjob
+    become: true
+    cron:
+      name: "ERP Database Maintenance Job - VACUUM/ANALYIS/REINDEX"
+      hour: '{{ cron_hr }}'
+      minute: '{{ cron_min }}'
+      job: sh /data/backup/sbicloud/script/vacuum_analyze_reindex.sh
+      state: present
   - name: Tacking up crontab backup file to /tmp
     shell: crontab -l >/tmp/root.cron
     become: true
-  - name: Modify pattern as This is test execution
-    shell: sed -i '/This is test execution/s/^/#/g' /tmp/root.cron
-    become: true
-  - name: Modify backup file using sed as needed
-    shell: sed -e '/My name is jakir/s/^/#/g' /tmp/root.cron >/tmp/root.cron.new
+  # - name: Modify pattern as This is test execution
+  #   shell: sed -i '/This is test execution/s/^/#/g' /tmp/root.cron
+  #   become: true
+  # - name: Modify backup file using sed as needed
+  #   shell: sed -e '/My name is jakir/s/^/#/g' /tmp/root.cron >/tmp/root.cron.new
+  #   become: true
+  # - name: Creating new job
+  #   become: true
+  #   cron:
+  #     name: "Check disk"
+  #     hour: '{{ cron_hr }}'
+  #     minute: '{{ cron_min }}'
+  #     job: df -h >> /tmp/tomcathost.txt
+  #     state: present
+  - name: Commented in this cronjob
+    shell: sed -e '/vacuum_analyze_reindex.sh/s/^#//g' /tmp/root.cron >/tmp/root.cron.new
     become: true
   - name: Replacing last one to crontab
     shell: crontab /tmp/root.cron.new
     become: true
-- name: working on 105 for root cronjob
-  hosts: cron-host[1]
-  gather_facts: no
-  tasks:
-  - name: Tacking current cronjob bakcup to /tmp
-    shell: crontab -l >/tmp/root.cron
-    become: true
-  - name: Disabling cronjob matching pattern
-    shell: sed -e '/docer.logs/s/^/#/g' /tmp/root.cron >/tmp/root.cron.new
-    become: true
-  - name: Restore /tmp/root.cron.new 
-    shell: crontab /tmp/root.cron.new
-    become: true
+
+# - name: working on 105 for root cronjob
+#   hosts: cron-host[1]
+#   gather_facts: no
+#   vars:
+#           cron_hr: "{{ hour }}"
+#           cron_min: "{{ minute }}"
+#   tasks:
+#   - name: Tacking current cronjob bakcup to /tmp
+#     shell: crontab -l >/tmp/root.cron
+#     become: true
+#   - name: Disabling cronjob matching pattern
+#     shell: sed -e '/docer.logs/s/^/#/g' /tmp/root.cron >/tmp/root.cron.new
+#     become: true
+#   - name: Restore /tmp/root.cron.new
+#     shell: crontab /tmp/root.cron.new
+#     become: true
+#   - name: Creating new cronjob
+#     #become: true # If don't allow root user into ssh
+#     cron:
+#       name: "Check disk"
+#       hour: '{{ cron_hr }}'
+#       minute: '{{ cron_min }}'
+#       job: df -h >> /tmp/diskusage.txt
+#       state: present
 
