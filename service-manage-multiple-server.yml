@@ -1,0 +1,56 @@
+# PGPOOLs service stopped one by one, 2nd pgpool sever first check previous pgpool server's service has stopped then stopped 2nd pgpool server's service and 3rd one....
+
+- name: Check if pgpool is running
+  hosts: pgpool-1
+  gather_facts: no
+  tasks:
+  - name: Checking pgpool status
+    shell: systemctl status edb-pgpool-4.2 | grep active | awk -v N=2 '{print $N}'
+    ignore_errors: yes
+    changed_when: false
+    register: svc_state
+  - debug: msg="{{svc_state.stdout}}"
+
+  - name: Stop edb-pgpool-4.2
+    systemd: 
+      name: edb-pgpool-4.2
+      state: stopped
+    when: svc_state.stdout == 'active'
+
+  - name: Check pgpool-1 inactive
+    shell: systemctl status edb-pgpool-4.2 | grep inactive | awk -v N=2 '{print $N}'
+    register: dead_state
+  - debug: msg="{{dead_state.stdout}}"
+
+- name: pgpool 2 service stop if pgpool-1 stopped
+  hosts: pgpool-2
+  gather_facts: no
+  tasks:
+  - debug: var=hostvars['pgpool-1']['dead_state']
+    #when: hostvars['pgpool-1']['dead_state'] is defined
+  - name: Stop pgpool-2 server
+    systemd:
+      name: edb-pgpool-4.2
+      state: stopped
+    when: hostvars['pgpool-1']['dead_state'].stdout == 'inactive'
+
+  - name: Check pgpool-2 inactive
+    shell: systemctl status edb-pgpool-4.2 | grep inactive | awk -v N=2 '{print $N}'
+    register: pg2_dead_state
+  - debug: msg="{{pg2_dead_state.stdout}}"
+
+- name: pgpool-3 svc stop if pgpool-2 is in stopped mode
+  hosts: pgpool-3
+  gather_facts: no
+  tasks:
+  - debug: var=hostvars['pgpool-2']['pg2_dead_state']
+  - name: stop pgpool-3 service
+    systemd:
+      name: edb-pgpool-4.2
+      state: stopped
+    when: hostvars['pgpool-2']['pg2_dead_state'].stdout == 'inactive'
+
+  - name: stop haproxy in pgpool-3
+    systemd:
+      name: haproxy
+      state: stopped
