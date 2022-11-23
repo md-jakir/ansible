@@ -1,0 +1,25 @@
+- name: Service management playbook
+  hosts: "web-frontend"
+  gather_facts: no
+  tasks:
+  - name: check hostname
+    shell: hostnamectl
+    register: web_test
+  - debug: msg="{{web_test.stdout}}"
+  
+  - name: Check service status
+    shell: netstat -tlpn |grep 8443 | awk -v N=6 '{print $N}'
+    register: port_check
+  - debug: msg="{{port_check.stdout}}"
+
+  - name: stop Apache service
+    shell: apachectl -k stop
+    register: apache_stop
+    when: port_check.stdout == 'LISTEN'
+  - debug: msg="{{apache_stop.stdout}}"
+
+  - name: Start Apache Service
+    shell: apachectl -k start
+    register: apache_start
+    tags: tag1
+  - debug: msg="{{apache_start.stdout}}"
