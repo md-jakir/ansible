@@ -1,0 +1,4 @@
+- name: Configure full stack server
+  hosts: f-server-1
+  gather_facts: no
+  tasks:
