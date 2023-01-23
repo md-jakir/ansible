@@ -1,0 +1,6 @@
+- name: Print DB server data
+  hosts: all
+  gather_facts: no
+  tasks:
+    - debug:
+        var: db_version
