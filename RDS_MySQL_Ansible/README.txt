@@ -13,3 +13,7 @@ And you will be asking to provide password
 During playbook execution have to pass vault password like this
 
 - ansible-playbook table_bak_aws_rds.yml --ask-vault-password
+
+- ansible-valut --help
+
+- ansible-vault decrypt db_vault.yml
