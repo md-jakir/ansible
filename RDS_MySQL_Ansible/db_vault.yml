@@ -1,0 +1,7 @@
+db_name: ******
+db_user: ******
+db_pass: **********
+db_host: database-1.ciahw21bdnzz.ap-south-1.rds.amazonaws.com
+tb_name: Persons
+db_port: 3306
+new_tb: new_persions
