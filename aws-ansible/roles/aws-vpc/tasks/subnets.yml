@@ -1,0 +1,45 @@
+---
+# Subnet creation tasks
+- name: Create public subnets
+  amazon.aws.ec2_vpc_subnet:
+    vpc_id: "{{ vpc_id }}"
+    cidr: "{{ item.cidr }}"
+    az: "{{ item.az }}"
+    region: "{{ aws_region }}"
+    map_public: yes
+    state: present
+    tags:
+      Name: "{{ vpc_name }}-public-{{ item.az }}"
+      Type: "Public"
+      Environment: "Production"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  loop: "{{ public_subnets }}"
+  register: public_subnet_result
+
+- name: Create private subnets
+  amazon.aws.ec2_vpc_subnet:
+    vpc_id: "{{ vpc_id }}"
+    cidr: "{{ item.cidr }}"
+    az: "{{ item.az }}"
+    region: "{{ aws_region }}"
+    state: present
+    tags:
+      Name: "{{ vpc_name }}-private-{{ item.az }}"
+      Type: "Private"
+      Environment: "Production"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  loop: "{{ private_subnets }}"
+  register: private_subnet_result
+
+- name: Set subnet facts
+  set_fact:
+    public_subnet_ids: "{{ public_subnet_result.results | map(attribute='subnet.id') | list }}"
+    private_subnet_ids: "{{ private_subnet_result.results | map(attribute='subnet.id') | list }}"
+
+- name: Debug subnet creation
+  debug:
+    msg: 
+      - "Public subnets created: {{ public_subnet_ids }}"
+      - "Private subnets created: {{ private_subnet_ids }}"

@@ -1,0 +1,49 @@
+---
+# Security group creation tasks
+- name: Create security group for web servers
+  amazon.aws.ec2_group:
+    name: "{{ web_sg_name }}"
+    description: "Security group for web servers"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 80
+          - 443
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: "{{ admin_cidr }}"
+    state: present
+    tags:
+      Name: "{{ web_sg_name }}"
+      Environment: "Production"
+  register: web_sg_result
+
+- name: Create security group for database servers
+  amazon.aws.ec2_group:
+    name: "{{ db_sg_name }}"
+    description: "Security group for database servers"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    rules:
+      - proto: tcp
+        from_port: 3306
+        to_port: 3306
+        group_id: "{{ web_sg_result.group_id }}"
+    state: present
+    tags:
+      Name: "{{ db_sg_name }}"
+      Environment: "Production"
+  register: db_sg_result
+
+- name: Set security group facts
+  set_fact:
+    web_sg_id: "{{ web_sg_result.group_id }}"
+    db_sg_id: "{{ db_sg_result.group_id }}"

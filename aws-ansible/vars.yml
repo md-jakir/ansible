@@ -1,0 +1,32 @@
+---
+# Default variables for aws-vpc role
+vpc_name: "ansible-vpc"
+igw_name: "Demo_IGW"
+vpc_cidr: "10.0.0.0/16"
+vpc_domain_name: "ec2.internal"
+vpc_dns_servers:
+  - "AmazonProvidedDNS"
+
+aws_region: "ap-southeast-1"
+aws_access_key: "you aws access key here"
+aws_secret_key: "you aws secret key here"
+
+public_subnets:
+  - cidr: "10.0.1.0/24"
+    az: "ap-southeast-1a"
+  - cidr: "10.0.2.0/24"
+    az: "ap-southeast-1b"
+
+private_subnets:
+  - cidr: "10.0.10.0/24"
+    az: "ap-southeast-1a"
+  - cidr: "10.0.20.0/24"
+    az: "ap-southeast-1b"
+
+web_sg_name: "web-sg"
+db_sg_name: "db-sg"
+admin_cidr: "0.0.0.0/0"
+
+# Route table configuration
+public_rt_name: "{{ vpc_name }}-public-rt"
+private_rt_name: "{{ vpc_name }}-private-rt"

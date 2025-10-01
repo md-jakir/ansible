@@ -1,0 +1,66 @@
+---
+# Route table and routing tasks
+- name: Create public route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_region }}"
+    tags:
+      Name: "{{ vpc_name }}-public-rt"
+    routes:
+      - dest: "0.0.0.0/0"
+        gateway_id: "{{ igw_id }}"
+    state: present
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: public_rt_result
+
+- name: Set public route table ID fact
+  set_fact:
+    public_rt_id: "{{ public_rt_result.route_table.route_table_id }}"
+
+- name: Create private route table
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_region }}"
+    tags:
+      Name: "{{ vpc_name }}-private-rt"
+    state: present
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: private_rt_result
+
+- name: Set private route table ID fact
+  set_fact:
+    private_rt_id: "{{ private_rt_result.route_table.route_table_id }}"
+
+- name: Associate public subnets with public route table using AWS CLI
+  shell: |
+    aws ec2 associate-route-table \
+      --route-table-id {{ public_rt_id }} \
+      --subnet-id {{ item }} \
+      --region {{ aws_region }}
+  loop: "{{ public_subnet_ids }}"
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_region }}"
+  ignore_errors: yes
+
+- name: Associate private subnets with private route table using AWS CLI
+  shell: |
+    aws ec2 associate-route-table \
+      --route-table-id {{ private_rt_id }} \
+      --subnet-id {{ item }} \
+      --region {{ aws_region }}
+  loop: "{{ private_subnet_ids }}"
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_region }}"
+  ignore_errors: yes
+
+- name: Debug route table creation
+  debug:
+    msg:
+      - "Public route table {{ public_rt_id }} created and associated with subnets: {{ public_subnet_ids }}"
+      - "Private route table {{ private_rt_id }} created and associated with subnets: {{ private_subnet_ids }}"

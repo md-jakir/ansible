@@ -1,0 +1,21 @@
+---
+# Main tasks file for aws-vpc role
+- name: Include VPC configuration tasks
+  import_tasks: vpc.yml
+  tags: vpc
+
+- name: Include subnet configuration tasks
+  import_tasks: subnets.yml
+  tags: subnets
+
+- name: Include Internet Gateway tasks
+  import_tasks: igw.yml
+  tags: igw
+
+- name: Include route table tasks
+  import_tasks: routes.yml
+  tags: routes
+
+- name: Include security group tasks
+  import_tasks: security_groups.yml
+  tags: security_groups

@@ -1,0 +1,12 @@
+## This is playbbook where role is defined
+---
+- hosts: localhost
+  remote_user: root
+  become: true
+  collections:
+    - amazon.aws
+  roles: 
+    - aws-vpc
+  vars_files:
+    - vars.yml
+  

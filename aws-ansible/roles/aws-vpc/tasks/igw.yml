@@ -1,0 +1,21 @@
+---
+# Internet Gateway creation tasks
+- name: Create Internet Gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_region }}"
+    state: present
+    tags:
+      Name: "{{ igw_name }}"
+      Environment: "Production"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: igw_result
+
+- name: Set IGW ID fact
+  set_fact:
+    igw_id: "{{ igw_result.gateway_id }}"
+
+- name: Debug IGW creation
+  debug:
+    msg: "Internet Gateway {{ igw_id }} created successfully for VPC {{ vpc_id }}"

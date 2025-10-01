@@ -1,0 +1,24 @@
+---
+# VPC creation tasks
+- name: Create VPC
+  amazon.aws.ec2_vpc_net:
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ vpc_cidr }}"
+    region: "{{ aws_region }}"
+    state: present
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: vpc_result
+
+- name: Set VPC ID fact
+  set_fact:
+    vpc_id: "{{ vpc_result.vpc.id }}"
+
+- name: Enable DNS hostnames
+  amazon.aws.ec2_vpc_dhcp_option:
+    vpc_id: "{{ vpc_id }}"
+    domain_name: "{{ vpc_domain_name }}"
+    dns_servers: "{{ vpc_dns_servers }}"
+    state: present
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
