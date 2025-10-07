@@ -2,8 +2,12 @@
 ## Have to input aws_access_key value and aws_secret_key value. 
 ## this file will be places uder vars folder in a aws-vpc role
 ---
-aws_access_key: " "
-aws_secret_key: " "
+## Prefer retrieving credentials from Vault or environment variables.
+# If using HashiCorp Vault set `vault_aws_secret_path` to the secret path
+# containing `aws_access_key_id` and `aws_secret_access_key`.
+aws_access_key: ""
+aws_secret_key: ""
+vault_aws_secret_path: ""  # e.g. secret/data/ansible/aws
 region: "us-east-2"
 
 # VPC

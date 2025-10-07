@@ -6,7 +6,7 @@
   collections:
     - amazon.aws
   vars_files:
-    - defaults/main.yml
+    - vars.yml
   tasks:
     - name: Delete security groups
       amazon.aws.ec2_group:

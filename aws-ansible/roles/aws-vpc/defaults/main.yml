@@ -8,8 +8,15 @@ vpc_dns_servers:
   - "AmazonProvidedDNS"
 
 aws_region: "ap-southeast-1"
-aws_access_key: "you aws access key here"
-aws_secret_key: "you aws secret key here"
+
+# Vault configuration
+vault_addr: "{{ lookup('env', 'VAULT_ADDR') | default('https://127.0.0.1:8200') }}"
+vault_token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+vault_aws_secret_path: "ansible-lab/data/ntech_aws_access"
+
+# AWS credentials - retrieved from Vault using hashi_vault lookup
+aws_access_key: "{{ lookup('community.hashi_vault.hashi_vault', 'ansible-lab/data/ntech_aws_access:aws_access_key validate_certs=false url=' + vault_addr) }}"
+aws_secret_key: "{{ lookup('community.hashi_vault.hashi_vault', 'ansible-lab/data/ntech_aws_access:aws_secret_key validate_certs=false url=' + vault_addr) }}"
 
 public_subnets:
   - cidr: "10.0.1.0/24"

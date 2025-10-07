@@ -1,5 +1,7 @@
 ---
 # Main tasks file for aws-vpc role
+# AWS credentials are retrieved from Vault in defaults/main.yml
+
 - name: Include VPC configuration tasks
   import_tasks: vpc.yml
   tags: vpc
