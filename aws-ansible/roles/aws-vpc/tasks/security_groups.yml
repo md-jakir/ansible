@@ -24,6 +24,10 @@
       Environment: "Production"
   register: web_sg_result
 
+- name: Debug web security group result
+  debug:
+    var: web_sg_result
+
 - name: Create security group for database servers
   amazon.aws.ec2_group:
     name: "{{ db_sg_name }}"
@@ -42,6 +46,10 @@
       Name: "{{ db_sg_name }}"
       Environment: "Production"
   register: db_sg_result
+
+- name: Debug database security group result
+  debug:
+    var: db_sg_result
 
 - name: Set security group facts
   set_fact:

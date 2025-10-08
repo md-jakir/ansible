@@ -17,6 +17,10 @@
   loop: "{{ public_subnets }}"
   register: public_subnet_result
 
+- name: Debug public subnet result
+  debug:
+    var: public_subnet_result
+
 - name: Create private subnets
   amazon.aws.ec2_vpc_subnet:
     vpc_id: "{{ vpc_id }}"
@@ -33,10 +37,21 @@
   loop: "{{ private_subnets }}"
   register: private_subnet_result
 
+- name: Debug private subnet result
+  debug:
+    var: private_subnet_result
+
 - name: Set subnet facts
   set_fact:
     public_subnet_ids: "{{ public_subnet_result.results | map(attribute='subnet.id') | list }}"
     private_subnet_ids: "{{ private_subnet_result.results | map(attribute='subnet.id') | list }}"
+  when: not ansible_check_mode
+
+- name: Set dummy subnet facts for check mode
+  set_fact:
+    public_subnet_ids: ["subnet-check-mode-1", "subnet-check-mode-2"]
+    private_subnet_ids: ["subnet-check-mode-3", "subnet-check-mode-4"]
+  when: ansible_check_mode
 
 - name: Debug subnet creation
   debug:

@@ -10,9 +10,24 @@
     aws_secret_key: "{{ aws_secret_key }}"
   register: vpc_result
 
+- name: Debug VPC result
+  debug:
+    var: vpc_result
+
 - name: Set VPC ID fact
   set_fact:
-    vpc_id: "{{ vpc_result.vpc.id }}"
+    vpc_id: "{{ vpc_result.vpc_id | default(vpc_result.vpc.id) }}"
+  when: vpc_result.vpc_id is defined or vpc_result.vpc.id is defined
+
+- name: Set dummy VPC ID for check mode
+  set_fact:
+    vpc_id: "vpc-check-mode-dummy"
+  when: ansible_check_mode and vpc_result.vpc_id is not defined and vpc_result.vpc.id is not defined
+
+- name: Fail if VPC ID is not available
+  fail:
+    msg: "VPC ID is not available. VPC creation may have failed."
+  when: vpc_id is not defined and not ansible_check_mode
 
 - name: Enable DNS hostnames
   amazon.aws.ec2_vpc_dhcp_option:
@@ -22,3 +37,4 @@
     state: present
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
+  when: not ansible_check_mode and vpc_id != "vpc-check-mode-dummy"
